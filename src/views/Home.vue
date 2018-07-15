@@ -31,7 +31,7 @@
                 firebase.auth().signInWithPopup(provider).then((result) => {
                     console.log(result);
                     console.log(this.userData);
-                    this.userData.name = result.additionalUserInfo.name;
+                    this.userData.name = result.additionalUserInfo.profile.name;
                     this.userData.image = result.additionalUserInfo.profile.profile_image_url;
                 }).catch((error) => {
                     console.log(error);
