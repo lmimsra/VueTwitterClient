@@ -27,10 +27,11 @@
         },
         methods: {
             login() {
+                //ブラウザが瞬時のポップアップをブロックしてきた時、ログイン処理を行う
+                //TODO:後ほどこの辺の処理は外部ライブラリ化させたい
                 const provider = new firebase.auth.TwitterAuthProvider();
                 firebase.auth().signInWithPopup(provider).then((result) => {
-                    console.log(result);
-                    console.log(this.userData);
+                    localStorage.setItem("TwimaUser",JSON.stringify(result));
                     this.userData.name = result.additionalUserInfo.profile.name;
                     this.userData.image = result.additionalUserInfo.profile.profile_image_url;
                 }).catch((error) => {
@@ -41,18 +42,18 @@
         },
         created: function () {
             if (!firebase.apps.length) {
+                //firebaseインスタンスが存在しない場合画面起動時に作成
                 firebase.initializeApp(setting);
                 console.log("create fire base");
             }
-            var tmp=JSON.parse(localStorage.getItem("TwimaUser"));
-            console.log(tmp);
+            //念のため毎度コンソールにJsonは吐くようにしておく
+            console.log(JSON.parse(localStorage.getItem("TwimaUser")));
             this.$store.dispatch('initializeUser');
-            if (this.$store.getters.isLogin == null) {
-                console.log(this.$store.getters.isLogin == null);
+            if (this.$store.getters.getUser == null) {
+                //ユーザ情報の初期化に失敗した時は
                 const provider = new firebase.auth.TwitterAuthProvider();
                 firebase.auth().signInWithPopup(provider).then((result) => {
                     localStorage.setItem("TwimaUser",JSON.stringify(result));
-                    console.log(localStorage.getItem("TwimaUser"));
                     this.$store.dispatch('setUser',result);
                     this.userData.name = result.additionalUserInfo.profile.name;
                     this.userData.image = result.additionalUserInfo.profile.profile_image_url;
@@ -61,8 +62,9 @@
 
                 });
             }else {
-                this.userData.name = this.$store.twima.user;
-                this.userData.image = this.$store.twima.image;
+                this.userData.name = this.$store.getters.getUser.name;
+                this.userData.image = this.$store.getters.getUser.profile_image_url;
+                console.log(this.$store.getters.getAccessKeys);
             }
         }
     }

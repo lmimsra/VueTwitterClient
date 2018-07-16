@@ -1,9 +1,11 @@
-import Vue from 'vue'
 
 const state = {
     count: 0,
     user: null,
-    image: null
+    access:{
+        token:null,
+        secret:null,
+    }
 };
 
 const mutations = {
@@ -11,8 +13,10 @@ const mutations = {
         state.count = state.count + 1;
     },
     C_setUser(state, user) {
-        state.user = user.additionalUserInfo.profile.name;
-        state.image = user.additionalUserInfo.profile.profile_image_url;
+        state.user = user.additionalUserInfo.profile;
+        state.access.token = user.credential.accessToken;
+        state.access.secret = user.credential.secret;
+
     }
 };
 
@@ -24,7 +28,8 @@ const actions = {
         commit('C_setUser', user);
     },
     initializeUser: ({commit, state}) => {
-        if (localStorage.getItem("TwimaUser")) {
+        if (localStorage.getItem("TwimaUser") && state.user ==null) {
+            console.log('初期化処理をしました');
             commit('C_setUser', JSON.parse(localStorage.getItem("TwimaUser")));
         }
     }
@@ -34,10 +39,13 @@ const getters = {
     currentCount: state => {
         return state.count;
     },
-    isLogin: state => {
+    getUser: state => {
         // if (localStorage.getItem("TwimaUser")) state.user = JSON.parse(localStorage.getItem("TwimaUser"));
         return state.user;
     },
+    getAccessKeys: state => {
+        return state.access;
+    }
 
 };
 
