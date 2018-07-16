@@ -14,6 +14,7 @@
     import firebase from 'firebase'
     import setting from '../library/secret-keys'
 
+
     export default {
         name: 'home',
         data() {
@@ -26,7 +27,6 @@
         },
         methods: {
             login() {
-                firebase.initializeApp(setting);
                 const provider = new firebase.auth.TwitterAuthProvider();
                 firebase.auth().signInWithPopup(provider).then((result) => {
                     console.log(result);
@@ -35,8 +35,35 @@
                     this.userData.image = result.additionalUserInfo.profile.profile_image_url;
                 }).catch((error) => {
                     console.log(error);
+
                 });
             },
+        },
+        created: function () {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(setting);
+                console.log("create fire base");
+            }
+            var tmp=JSON.parse(localStorage.getItem("TwimaUser"));
+            console.log(tmp);
+            this.$store.dispatch('initializeUser');
+            if (this.$store.getters.isLogin == null) {
+                console.log(this.$store.getters.isLogin == null);
+                const provider = new firebase.auth.TwitterAuthProvider();
+                firebase.auth().signInWithPopup(provider).then((result) => {
+                    localStorage.setItem("TwimaUser",JSON.stringify(result));
+                    console.log(localStorage.getItem("TwimaUser"));
+                    this.$store.dispatch('setUser',result);
+                    this.userData.name = result.additionalUserInfo.profile.name;
+                    this.userData.image = result.additionalUserInfo.profile.profile_image_url;
+                }).catch((error) => {
+                    console.log(error);
+
+                });
+            }else {
+                this.userData.name = this.$store.twima.user;
+                this.userData.image = this.$store.twima.image;
+            }
         }
     }
 </script>
